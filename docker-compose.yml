@@ -1,0 +1,57 @@
+version: "3.7"
+services:
+  # Service for the Postgres database
+  # Proxies requests to internal services
+  api-gateway:
+    image: nginx:1.17.10
+    container_name: reverse_proxy
+    depends_on:
+      - back-end
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: web.Dockerfile
+    ports:
+      - 8080:80
+    restart: on-failure
+  
+  databaseall:
+    # Pull the latest 'postgres' image
+    image: "postgres"
+    container_name: "quickeparkdb"
+    # Postgres environment parameters and creating volumes to keep data saved in local
+    volumes:
+      - quickepark-database:/var/lib/postgresql/data
+      - ./database/init-quickepark-database.sh:/docker-entrypoint-initdb.d/init-quickepark-database.sh
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    # Create environment
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD="Password"
+    # Bind mount the default Postgres port
+    ports:
+      - 5432:5432
+    
+  back-end:
+    build:
+      context: ./backend
+      dockerfile: service.Dockerfile
+    ports:
+      - 5000:5000
+    # environment: 
+    #   - DB_CONNECTION=quickeparkdb
+    #   - DB_HOST=databaseall
+    #   - DB_PORT=5432
+    #   - DB_DATABASE=postgres
+    #   - DB_USERNAME=postgres
+    restart: on-failure
+
+#MOUNTING VOLUMES
+volumes:
+  quickepark-database:
+    

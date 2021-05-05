@@ -1,0 +1,12 @@
+Flask
+Flask-Cors
+Flask-RESTful
+Flask-SQLAlchemy
+jwt
+pip
+psycopg2-binary
+PyJWT
+pylint
+smtp
+SQLAlchemy
+Werkzeug
